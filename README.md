@@ -1,224 +1,209 @@
-# Clinical Interface - Heidi Health Style UI
+# Clinical Care Partner
 
-A full-stack clinical management system built with Next.js 14, featuring patient management, consultation tracking, and AI-assisted clinical note-taking.
+> **An AI companion that works alongside healthcare providers, not above them.**
 
-## Features
+---
 
-- **Patient Management**: Complete CRUD operations for patient records
-- **Consultation Tracking**: Timeline-based consultation history
-- **Clinical Notes**: Auto-saving editable clinical note sections
-- **Heidi Health AI Integration**: Mock transcription and structured note generation
-- **Responsive Design**: Clean, professional medical dashboard UI
-- **Real-time Updates**: Auto-save functionality for clinical notes
+## The Problem
 
-## Tech Stack
+Completing a clinical encounter today requires:
+- Searching for information from **disparate sources**
+- Executing **time-sensitive actions**
+- Connecting insights to **next steps**
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **UI Components**: ShadCN UI (Radix UI)
-- **Database**: PostgreSQL with Prisma ORM
-- **API**: REST endpoints
+Current systems operate in a purely **reactive mode**, introducing latency into clinical reasoning and creating cognitive overhead as clinicians must simultaneously research, diagnose, treat, and action all the steps necessary to treat their patients.
 
-## Quick Start
+### Why does this happen?
 
-### Prerequisites
+**Because data is missing.** Because electronic medical records are messy and stored in non-functional, non-aesthetic EMRs that make finding critical information feel like archaeology.
 
-- Node.js 18+
-- Docker (for PostgreSQL)
-- npm or yarn
+---
 
-### Installation
+## Our Approach
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd hckthn-heidibuild
-   ```
+LLMs are here to help. But **how do we make AI visible in a way that physicians actually want to use?**
 
-2. **Start PostgreSQL database**
-   ```bash
-   docker-compose up -d
-   ```
+Here's the truth: physicians aren't yet accustomed to AI-based clinical decision support tools. Many existing examples have failed to gain adoption. Why?
 
-3. **Run the setup script**
-   ```bash
-   npm run setup
-   ```
+**Because they feel like tools, not partners.**
 
-   This will install dependencies, generate Prisma client, push schema, and seed the database.
+We need systems that act as **care partners** for patients and physicians—not data dumps they could get from ChatGPT. These systems should integrate into their workflow **kindly**, standing on their side.
 
-   **OR** run each step manually:
-   ```bash
-   npm install
-   npx prisma generate
-   npx prisma db push
-   npm run db:seed
-   ```
+> **Not on the side of pharma. Not on the side of insurance. Only on the side of HCPs and their patients.**
 
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+---
 
-5. **Open your browser**
+## The Solution: Three Touchpoints
 
-   Navigate to [http://localhost:3000](http://localhost:3000)
+We've created an AI clinical partner that meets physicians exactly when and where they need it most:
+
+### 1. Before the Day Begins → **Awareness**
+
+**The Daily Briefing Newsletter**
+
+Instead of a boring data dump, physicians start their day with an engaging newsletter—something they'd actually want to read with their morning coffee.
+
+- Warm, conversational tone (like a knowledgeable colleague)
+- Scannable sections with clear visual hierarchy
+- Priority patients flagged with context
+- Drug interactions and allergy alerts
+- Clinical pearls specific to today's panel
+
+*"Good afternoon! You've got 6 patients on your schedule today, and I've already done my homework on them..."*
+
+### 2. Before Each Visit → **Preparation**
+
+**Patient-Specific AI Insights**
+
+When the physician clicks into a patient's profile, they get a curated analysis of that specific patient's history, current concerns, and preparation notes.
+
+- Longitudinal pattern recognition across visits
+- Flagged care gaps and missed follow-ups
+- Medication history and interaction warnings
+- Historical context that might be buried in notes
+
+### 3. After Each Visit → **Safety & Completeness**
+
+**Consultation Transcript Analysis**
+
+After the encounter, when the Heidi Health transcription is complete, the AI analyzes the session for:
+
+- Risk alerts (substance use patterns, mood concerns)
+- Clinical guideline references
+- Drug warnings and contraindications
+- Documentation suggestions (ICD codes, plan elements)
+- Care coordination needs
+
+This isn't just documentation—it's **malpractice prevention** and **quality assurance** that helps HCPs ensure nothing falls through the cracks.
+
+---
+
+## Why Physicians Will Actually Use This
+
+Most clinical decision support fails because it feels like:
+- Another alert to dismiss
+- A system telling them what to do
+- Data they could find themselves (but faster)
+
+Our approach works because:
+
+1. **It's a story, not a report** — The newsletter format makes AI feel like a helpful colleague sharing insights over coffee, not a robot spitting out data.
+
+2. **It meets them in their workflow** — Three natural touchpoints that align with how physicians already think about their day.
+
+3. **It's on their side** — Every insight is framed to help the physician provide better care and protect themselves, not to push protocols or pharma interests.
+
+4. **It respects their expertise** — Suggestions, not demands. Context, not commands. The physician remains the decision-maker.
+
+---
+
+## Technical Implementation
+
+### Stack
+- **Next.js 14** (App Router) — React server components
+- **Prisma ORM** — PostgreSQL database
+- **Anthropic Claude API** — claude-sonnet-4 for analysis
+- **Heidi Health Integration** — Transcription and structured notes
+- **ShadCN UI** — Clean, professional interface
+- **TypeScript** — Type-safe throughout
+
+### Key Features
+- Real-time AI analysis at three touchpoints
+- Rich patient data model (vitals, medications, allergies, social history)
+- Consultation timeline with clinical notes
+- Editable clinical note sections
+- Structured transcription display
+
+### Data Model
+- **Patients** — Demographics, vitals, medications, allergies, insurance, social history
+- **Consultations** — Clinical notes (SOAP format), transcriptions, AI analysis results, risk alerts
+
+---
+
+## Demo Scenario: Alex Morgan
+
+The demo showcases a patient with a complex 5-year medical history:
+
+- **Evolving hypothyroidism** that's been flagged repeatedly but never treated
+- **Fragmented care** across primary care, urgent care, and gynecology
+- **Pattern recognition** — the AI connects symptoms across multiple visits that individual providers missed
+- **Today's session** — A therapy follow-up with full Heidi transcription and structured notes
+
+The AI identifies that Alex's fatigue, mood symptoms, and menstrual irregularities are likely all connected to untreated hypothyroidism (TSH 7.8), which has been noted but never addressed across 5 years of visits with different providers.
+
+---
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your ANTHROPIC_API_KEY and DATABASE_URL
+
+# Push database schema
+npx prisma db push
+
+# Seed demo data
+npm run db:seed
+
+# Run development server
+npm run dev
+```
+
+Visit `http://localhost:3000` to explore:
+- **Dashboard** — Daily schedule with newsletter button
+- **Patient profiles** — Individual AI insights
+- **Consultations** — Transcript analysis and clinical notes
+
+---
+
+## The Vision
+
+We believe clinical AI should be:
+
+- **Invisible when not needed** — No alert fatigue, no pop-ups
+- **Present when it matters** — The right insight at the right moment
+- **Trustworthy** — Clinically accurate, never overstepping
+- **Human** — Warm, conversational, encouraging
+
+The best tools feel like extensions of yourself. That's what we're building—an AI that makes physicians feel supported, not surveilled. Prepared, not pressured. Confident, not second-guessed.
+
+---
 
 ## Project Structure
 
 ```
 ├── app/
-│   ├── api/                    # API routes
-│   │   ├── patients/          # Patient CRUD endpoints
-│   │   ├── consultations/     # Consultation endpoints
-│   │   └── heidi/             # Mock Heidi Health API
-│   ├── patients/              # Patient pages
-│   │   └── [id]/              # Patient detail page
-│   ├── consultations/         # Consultation pages
-│   │   └── [id]/              # Consultation detail page
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
+│   ├── api/
+│   │   ├── ai/                   # AI analysis endpoints
+│   │   │   ├── analyze/          # Daily panel analysis
+│   │   │   ├── patient/[id]/     # Patient-specific insights
+│   │   │   └── consultation/[id]/ # Transcript analysis
+│   │   ├── patients/             # Patient CRUD
+│   │   └── consultations/        # Consultation endpoints
+│   ├── patients/[id]/            # Patient detail page
+│   └── consultations/[id]/       # Consultation detail page
 ├── components/
-│   ├── ui/                    # ShadCN UI components
-│   ├── clinical-note-section.tsx
-│   ├── consultations-timeline.tsx
-│   ├── edit-patient-dialog.tsx
-│   ├── heidi-panel.tsx
-│   └── new-patient-dialog.tsx
-├── lib/
-│   ├── prisma.ts              # Prisma client
-│   ├── types.ts               # TypeScript types
-│   ├── validations.ts         # Zod schemas
-│   ├── date-utils.ts          # Date utilities
-│   ├── use-debounce.ts        # Debounce hook
-│   └── utils.ts               # Utility functions
+│   ├── ai-insights-panel.tsx     # Daily newsletter UI
+│   ├── patient-insights-panel.tsx # Patient-specific insights UI
+│   ├── consultation-ai-support.tsx # Post-visit analysis UI
+│   └── heidi-panel.tsx           # Heidi integration
 ├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── seed.ts                # Seed data
-├── docker-compose.yml         # PostgreSQL setup
-└── package.json
+│   ├── schema.prisma             # Database schema
+│   └── seed.ts                   # Demo data with Alex Morgan
+└── lib/
+    └── prisma.ts                 # Database client
 ```
 
-## Database Schema
+---
 
-### Patient Model
-- Demographics (name, DOB, gender)
-- Contact information (phone, email, address)
-- Labels/conditions
-- Vitals (JSON)
-- Related consultations
+## Team
 
-### Consultation Model
-- Patient relationship
-- Healthcare provider
-- Consultation metadata (type, time, status)
-- Clinical notes (chief complaint, HPI, exam, assessment, plan, follow-up)
-- Heidi Health integration (transcription, structured notes)
-- AI support channels (placeholders for risk alerts, guidelines, etc.)
+Built for Heidi Health Hackathon 2024
 
-## API Endpoints
+---
 
-### Patients
-- `GET /api/patients` - List all patients
-- `POST /api/patients` - Create new patient
-- `GET /api/patients/[id]` - Get patient by ID
-- `PUT /api/patients/[id]` - Update patient
-- `DELETE /api/patients/[id]` - Delete patient
-
-### Consultations
-- `GET /api/patients/[id]/consultations` - Get patient consultations
-- `POST /api/patients/[id]/consultations` - Create consultation
-- `GET /api/consultations/[id]` - Get consultation by ID
-- `PUT /api/consultations/[id]` - Update consultation
-- `DELETE /api/consultations/[id]` - Delete consultation
-
-### Heidi Health (Mock)
-- `POST /api/heidi/transcribe` - Generate mock transcription
-- `POST /api/heidi/notes` - Generate mock structured notes
-
-## Features Overview
-
-### Patient Management
-- View all patients in a searchable table
-- Add new patients with comprehensive demographics
-- Edit patient information
-- View patient summary with vitals and labels
-- Access patient consultation history
-
-### Consultation Management
-- Timeline view of all consultations
-- Detailed consultation pages with metadata
-- Auto-saving clinical note sections:
-  - Chief Complaint
-  - History of Present Illness (HPI)
-  - Physical Examination
-  - Assessment
-  - Plan
-  - Follow-up Instructions
-
-### Heidi Health AI Integration (Mock)
-- Upload/record audio simulation
-- Mock transcription generation
-- Structured note generation from transcription
-- Auto-populate clinical note fields from AI output
-
-### AI Support Channels (Scaffolded)
-- Risk Alerts (placeholder)
-- Clinical Guidelines (placeholder)
-- Drug Warnings (placeholder)
-- Research Notes (placeholder)
-- Insurance Flags (placeholder)
-- Patient Context (placeholder)
-
-## Development
-
-### Database Management
-
-**View database in Prisma Studio:**
-```bash
-npx prisma studio
-```
-
-**Reset database:**
-```bash
-npx prisma db push --force-reset
-npm run db:seed
-```
-
-**Create migration:**
-```bash
-npx prisma migrate dev --name description
-```
-
-### Building for Production
-
-```bash
-npm run build
-npm start
-```
-
-## Notes
-
-- The Heidi Health API integration is currently mocked and returns sample data
-- AI support channels are scaffolded but not implemented
-- Auto-save functionality debounces at 1 second
-- All timestamps use date-fns for formatting
-
-## Future Enhancements
-
-- [ ] Real Heidi Health API integration
-- [ ] Implement AI support channels
-- [ ] Medications management
-- [ ] Laboratory results tracking
-- [ ] Imaging studies management
-- [ ] Search and filtering
-- [ ] Export functionality
-- [ ] User authentication and authorization
-- [ ] Audit logging
-- [ ] HIPAA compliance features
-
-## License
-
-MIT
+*"The goal isn't to replace physician judgment—it's to make sure they have everything they need to exercise it brilliantly."*

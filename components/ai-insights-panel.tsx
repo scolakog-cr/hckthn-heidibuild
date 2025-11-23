@@ -81,9 +81,9 @@ export function AIInsightsPanel() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">AI Clinical Insights</CardTitle>
+                <CardTitle className="text-lg">Daily Briefing</CardTitle>
                 <Badge variant="secondary" className="text-xs">
-                  Today's Schedule
+                  Your Morning Newsletter
                 </Badge>
               </div>
               <Button
@@ -125,6 +125,14 @@ export function AIInsightsPanel() {
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">
                   {analysis.split('\n').map((line, index) => {
+                    // Style main headers with emojis (## ☀️ Title)
+                    if (line.match(/^##\s/)) {
+                      return (
+                        <h2 key={index} className="text-lg font-bold mt-6 mb-3 first:mt-0 border-b border-primary/20 pb-2">
+                          {line.replace(/^##\s*/, '')}
+                        </h2>
+                      )
+                    }
                     // Style numbered headers (e.g., "1. **Title**")
                     if (line.match(/^\d+\.\s*\*\*/)) {
                       return (
@@ -133,11 +141,17 @@ export function AIInsightsPanel() {
                         </p>
                       )
                     }
-                    // Style bold text
+                    // Style bold patient names or key terms
                     if (line.startsWith('**') || line.includes('**')) {
+                      const parts = line.split(/(\*\*[^*]+\*\*)/)
                       return (
-                        <p key={index} className="font-medium mt-3 mb-1">
-                          {line.replace(/\*\*/g, '')}
+                        <p key={index} className="mt-2 mb-1">
+                          {parts.map((part, i) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                              return <strong key={i} className="text-foreground">{part.slice(2, -2)}</strong>
+                            }
+                            return part
+                          })}
                         </p>
                       )
                     }
@@ -148,6 +162,10 @@ export function AIInsightsPanel() {
                           {line}
                         </p>
                       )
+                    }
+                    // Style horizontal rule
+                    if (line.trim() === '---') {
+                      return <hr key={index} className="my-4 border-primary/10" />
                     }
                     // Regular text
                     if (line.trim()) {
