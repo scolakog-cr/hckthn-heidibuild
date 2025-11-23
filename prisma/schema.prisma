@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id            String         @id @default(cuid())
+  firstName     String
+  lastName      String
+  dob           DateTime
+  gender        String
+  phone         String?
+  email         String?
+  address       String?
+  labels        String[]
+  vitals        Json?
+  consultations Consultation[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Consultation {
+  id                String   @id @default(cuid())
+  patientId         String
+  patient           Patient  @relation(fields: [patientId], references: [id])
+  hcpId             String?
+  type              String?
+  startTime         DateTime?
+  endTime           DateTime?
+  status            String? // Scheduled / In Progress / Completed
+  chiefComplaint    String?
+  hpi               String?
+  exam              String?
+  assessment        String?
+  plan              String?
+  followUp          String?
+
+  // Heidi Health placeholders
+  transcriptionId   String?
+  transcriptionText String?
+  structuredNotes   Json?
+
+  // AI support channel placeholders
+  riskAlerts        Json?
+  guidelineRefs     Json?
+  drugWarnings      Json?
+  researchNotes     Json?
+  insuranceFlags    Json?
+  patientContext    Json?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
