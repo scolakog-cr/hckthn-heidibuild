@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/date-utils'
+import { format } from 'date-fns'
 import {
   Table,
   TableBody,
@@ -12,11 +13,12 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { NewPatientDialog } from '@/components/new-patient-dialog'
+import { AIInsightsPanel } from '@/components/ai-insights-panel'
 
 async function getPatients() {
   try {
     const patients = await prisma.patient.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { nextAppointment: 'asc' },
       include: {
         consultations: {
           orderBy: { startTime: 'desc' },
@@ -33,45 +35,52 @@ async function getPatients() {
 
 export default async function PatientsPage() {
   const patients = await getPatients()
+  const today = format(new Date(), 'EEEE, MMMM d, yyyy')
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Patients</h1>
+          <h1 className="text-3xl font-bold">Today's Schedule</h1>
           <p className="text-muted-foreground">
-            Manage and view all patient records
+            {today} · {patients.length} appointments
           </p>
         </div>
         <NewPatientDialog />
       </div>
 
+      <AIInsightsPanel />
+
       <Card>
         <CardHeader>
-          <CardTitle>All Patients ({patients.length})</CardTitle>
+          <CardTitle>Appointments</CardTitle>
         </CardHeader>
         <CardContent>
           {patients.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No patients found</p>
+              <p className="text-muted-foreground mb-4">No appointments scheduled</p>
               <NewPatientDialog />
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>DOB</TableHead>
-                  <TableHead>Gender</TableHead>
+                  <TableHead className="w-24">Time</TableHead>
+                  <TableHead>Patient</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Conditions</TableHead>
+                  <TableHead>Allergies</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Labels</TableHead>
-                  <TableHead>Last Visit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {patients.map((patient) => (
-                  <TableRow key={patient.id} className="cursor-pointer">
+                  <TableRow key={patient.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableCell className="font-medium">
+                      {patient.nextAppointment
+                        ? format(new Date(patient.nextAppointment), 'h:mm a')
+                        : 'N/A'}
+                    </TableCell>
                     <TableCell>
                       <Link
                         href={`/patients/${patient.id}`}
@@ -79,31 +88,56 @@ export default async function PatientsPage() {
                       >
                         {patient.firstName} {patient.lastName}
                       </Link>
+                      <p className="text-sm text-muted-foreground">
+                        {patient.gender}, {formatDate(patient.dob)}
+                      </p>
                     </TableCell>
-                    <TableCell>{formatDate(patient.dob)}</TableCell>
-                    <TableCell>{patient.gender}</TableCell>
-                    <TableCell>{patient.phone || 'N/A'}</TableCell>
-                    <TableCell>{patient.email || 'N/A'}</TableCell>
+                    <TableCell>
+                      {patient.appointmentType ? (
+                        <Badge variant={
+                          patient.appointmentType === 'Urgent Care' ? 'destructive' :
+                          patient.appointmentType === 'Sick Visit' ? 'default' :
+                          'secondary'
+                        }>
+                          {patient.appointmentType}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {patient.labels.length > 0 ? (
-                          patient.labels.map((label) => (
-                            <Badge key={label} variant="secondary">
+                          patient.labels.slice(0, 2).map((label) => (
+                            <Badge key={label} variant="outline">
                               {label}
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-muted-foreground text-sm">
-                            None
-                          </span>
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                        {patient.labels.length > 2 && (
+                          <Badge variant="outline">+{patient.labels.length - 2}</Badge>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {patient.consultations && patient.consultations.length > 0
-                        ? formatDate(patient.consultations[0].startTime)
-                        : 'No visits'}
+                      <div className="flex flex-wrap gap-1">
+                        {patient.allergies && patient.allergies.length > 0 ? (
+                          patient.allergies.slice(0, 2).map((allergy) => (
+                            <Badge key={allergy} variant="destructive" className="text-xs">
+                              {allergy}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground text-sm">NKA</span>
+                        )}
+                        {patient.allergies && patient.allergies.length > 2 && (
+                          <Badge variant="destructive" className="text-xs">+{patient.allergies.length - 2}</Badge>
+                        )}
+                      </div>
                     </TableCell>
+                    <TableCell className="text-sm">{patient.phone || 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

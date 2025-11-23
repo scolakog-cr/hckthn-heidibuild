@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ClinicalNoteSection } from '@/components/clinical-note-section'
 import { HeidiPanel } from '@/components/heidi-panel'
+import { ConsultationAISupport } from '@/components/consultation-ai-support'
 import { ArrowLeft, Calendar, Clock, User, Stethoscope } from 'lucide-react'
 
 async function getConsultation(id: string) {
@@ -165,53 +166,14 @@ export default async function ConsultationDetailPage({
             />
           </div>
 
-          {/* AI Support Channels - Placeholder Panels */}
+          {/* AI Support Channels */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold">AI Support Channels</h2>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Risk Alerts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  AI-powered risk assessment coming soon
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Clinical Guidelines</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Relevant clinical guidelines will appear here
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Drug Warnings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Drug interaction warnings coming soon
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Research Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  AI-curated research insights coming soon
-                </p>
-              </CardContent>
-            </Card>
+            <h2 className="text-2xl font-semibold">AI Clinical Decision Support</h2>
+            <ConsultationAISupport
+              consultationId={consultation.id}
+              patientName={`${consultation.patient.firstName} ${consultation.patient.lastName}`}
+              initialTranscript={consultation.transcriptionText || ''}
+            />
           </div>
         </div>
 

@@ -9,6 +9,13 @@ export interface Patient {
   address?: string | null
   labels: string[]
   vitals?: any
+  medications?: any
+  allergies: string[]
+  insuranceInfo?: any
+  emergencyContact?: any
+  socialHistory?: any
+  nextAppointment?: Date | string | null
+  appointmentType?: string | null
   consultations?: Consultation[]
   createdAt: Date | string
   updatedAt: Date | string

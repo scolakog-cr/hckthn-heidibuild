@@ -8,10 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EditPatientDialog } from '@/components/edit-patient-dialog'
 import { ConsultationsTimeline } from '@/components/consultations-timeline'
-import { MedicationsList } from '@/components/medications-list'
-import { LabResultsList } from '@/components/lab-results-list'
-import { ImagingStudiesList } from '@/components/imaging-studies-list'
-import { ArrowLeft, AlertTriangle, Phone, CreditCard } from 'lucide-react'
+import { PatientInsightsPanel } from '@/components/patient-insights-panel'
+import { ArrowLeft } from 'lucide-react'
 
 async function getPatient(id: string) {
   try {
@@ -20,15 +18,6 @@ async function getPatient(id: string) {
       include: {
         consultations: {
           orderBy: { startTime: 'desc' },
-        },
-        medications: {
-          orderBy: { startDate: 'desc' },
-        },
-        labResults: {
-          orderBy: { performedDate: 'desc' },
-        },
-        imagingStudies: {
-          orderBy: { performedDate: 'desc' },
         },
       },
     })
@@ -72,21 +61,20 @@ export default async function PatientDetailPage({
         </div>
       </div>
 
+      <PatientInsightsPanel
+        patientId={patient.id}
+        patientName={`${patient.firstName} ${patient.lastName}`}
+      />
+
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>
           <TabsTrigger value="summary">Summary</TabsTrigger>
           <TabsTrigger value="consultations">
             Consultations ({patient.consultations?.length || 0})
           </TabsTrigger>
-          <TabsTrigger value="medications">
-            Medications ({patient.medications?.length || 0})
-          </TabsTrigger>
-          <TabsTrigger value="labs">
-            Labs ({patient.labResults?.length || 0})
-          </TabsTrigger>
-          <TabsTrigger value="imaging">
-            Imaging ({patient.imagingStudies?.length || 0})
-          </TabsTrigger>
+          <TabsTrigger value="medications">Medications</TabsTrigger>
+          <TabsTrigger value="labs">Labs</TabsTrigger>
+          <TabsTrigger value="imaging">Imaging</TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary" className="space-y-4">
@@ -136,36 +124,13 @@ export default async function PatientDetailPage({
             </Card>
           </div>
 
-          {patient.allergies && patient.allergies.length > 0 && (
-            <Card className="border-destructive/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-5 w-5" />
-                  Allergies
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {patient.allergies.map((allergy) => (
-                    <Badge key={allergy} variant="destructive">
-                      {allergy}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           <div className="grid md:grid-cols-2 gap-4">
             {patient.emergencyContact && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5" />
-                    Emergency Contact
-                  </CardTitle>
+                  <CardTitle>Emergency Contact</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3">
                   <div>
                     <p className="text-sm text-muted-foreground">Name</p>
                     <p className="font-medium">{patient.emergencyContact.name}</p>
@@ -185,104 +150,155 @@ export default async function PatientDetailPage({
             {patient.insuranceInfo && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Insurance Information
-                  </CardTitle>
+                  <CardTitle>Insurance Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3">
                   <div>
                     <p className="text-sm text-muted-foreground">Provider</p>
                     <p className="font-medium">{patient.insuranceInfo.provider}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Policy Number</p>
-                    <p className="font-medium">{patient.insuranceInfo.policyNumber}</p>
+                    <p className="text-sm text-muted-foreground">Member ID</p>
+                    <p className="font-medium">{patient.insuranceInfo.memberId}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Group Number</p>
-                    <p className="font-medium">{patient.insuranceInfo.groupNumber}</p>
+                    <p className="text-sm text-muted-foreground">Group / Plan</p>
+                    <p className="font-medium">{patient.insuranceInfo.groupNumber} · {patient.insuranceInfo.planType}</p>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Labels & Conditions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {patient.labels.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {patient.labels.map((label) => (
-                    <Badge key={label} variant="secondary">
-                      {label}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No labels assigned</p>
-              )}
-            </CardContent>
-          </Card>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Labels & Conditions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {patient.labels.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {patient.labels.map((label) => (
+                      <Badge key={label} variant="secondary">
+                        {label}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No labels assigned</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Allergies</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {patient.allergies && patient.allergies.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {patient.allergies.map((allergy: string) => (
+                      <Badge key={allergy} variant="destructive">
+                        {allergy}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No known allergies</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {patient.vitals && (
             <Card>
               <CardHeader>
-                <CardTitle>Recent Vitals</CardTitle>
+                <CardTitle>Vitals</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {patient.vitals.bloodPressure && (
                     <div>
                       <p className="text-sm text-muted-foreground">Blood Pressure</p>
-                      <p className="font-medium text-lg">{patient.vitals.bloodPressure}</p>
-                      <p className="text-xs text-muted-foreground">mmHg</p>
+                      <p className="font-medium">{patient.vitals.bloodPressure}</p>
                     </div>
                   )}
                   {patient.vitals.heartRate && (
                     <div>
                       <p className="text-sm text-muted-foreground">Heart Rate</p>
-                      <p className="font-medium text-lg">{patient.vitals.heartRate}</p>
-                      <p className="text-xs text-muted-foreground">bpm</p>
+                      <p className="font-medium">{patient.vitals.heartRate} bpm</p>
                     </div>
                   )}
                   {patient.vitals.temperature && (
                     <div>
                       <p className="text-sm text-muted-foreground">Temperature</p>
-                      <p className="font-medium text-lg">{patient.vitals.temperature}</p>
-                      <p className="text-xs text-muted-foreground">°F</p>
+                      <p className="font-medium">{patient.vitals.temperature}°F</p>
                     </div>
                   )}
-                  {patient.vitals.weight && (
+                  {patient.vitals.respiratoryRate && (
                     <div>
-                      <p className="text-sm text-muted-foreground">Weight</p>
-                      <p className="font-medium text-lg">{patient.vitals.weight}</p>
-                      <p className="text-xs text-muted-foreground">lbs</p>
-                    </div>
-                  )}
-                  {patient.vitals.height && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Height</p>
-                      <p className="font-medium text-lg">{patient.vitals.height}</p>
-                      <p className="text-xs text-muted-foreground">cm</p>
-                    </div>
-                  )}
-                  {patient.vitals.bmi && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">BMI</p>
-                      <p className="font-medium text-lg">{patient.vitals.bmi}</p>
-                      <p className="text-xs text-muted-foreground">kg/m²</p>
+                      <p className="text-sm text-muted-foreground">Resp. Rate</p>
+                      <p className="font-medium">{patient.vitals.respiratoryRate} /min</p>
                     </div>
                   )}
                   {patient.vitals.oxygenSaturation && (
                     <div>
                       <p className="text-sm text-muted-foreground">O₂ Saturation</p>
-                      <p className="font-medium text-lg">{patient.vitals.oxygenSaturation}</p>
-                      <p className="text-xs text-muted-foreground">%</p>
+                      <p className="font-medium">{patient.vitals.oxygenSaturation}%</p>
                     </div>
                   )}
+                  {patient.vitals.weight && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Weight</p>
+                      <p className="font-medium">{patient.vitals.weight} lbs</p>
+                    </div>
+                  )}
+                  {patient.vitals.height && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Height</p>
+                      <p className="font-medium">{patient.vitals.height} cm</p>
+                    </div>
+                  )}
+                  {patient.vitals.bmi && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">BMI</p>
+                      <p className="font-medium">{patient.vitals.bmi}</p>
+                    </div>
+                  )}
+                  {patient.vitals.painLevel !== undefined && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pain Level</p>
+                      <p className="font-medium">{patient.vitals.painLevel}/10</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {patient.socialHistory && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Social History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Smoking</p>
+                    <p className="font-medium">{patient.socialHistory.smoking}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Alcohol</p>
+                    <p className="font-medium">{patient.socialHistory.alcohol}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Occupation</p>
+                    <p className="font-medium">{patient.socialHistory.occupation}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Exercise</p>
+                    <p className="font-medium">{patient.socialHistory.exercise}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -306,15 +322,61 @@ export default async function PatientDetailPage({
         </TabsContent>
 
         <TabsContent value="medications">
-          <MedicationsList medications={patient.medications || []} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Current Medications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {patient.medications && patient.medications.length > 0 ? (
+                <div className="space-y-4">
+                  {patient.medications.map((med: { name: string; dosage: string; frequency: string; purpose: string }, index: number) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-lg">{med.name}</p>
+                          <p className="text-sm text-muted-foreground">{med.purpose}</p>
+                        </div>
+                        <Badge variant="outline">{med.dosage}</Badge>
+                      </div>
+                      <p className="text-sm mt-2">
+                        <span className="text-muted-foreground">Frequency:</span> {med.frequency}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No medications on file</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="labs">
-          <LabResultsList labResults={patient.labResults || []} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Laboratory Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Lab results coming soon</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="imaging">
-          <ImagingStudiesList imagingStudies={patient.imagingStudies || []} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Imaging Studies</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Imaging studies coming soon</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
