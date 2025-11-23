@@ -8,7 +8,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EditPatientDialog } from '@/components/edit-patient-dialog'
 import { ConsultationsTimeline } from '@/components/consultations-timeline'
-import { ArrowLeft } from 'lucide-react'
+import { MedicationsList } from '@/components/medications-list'
+import { LabResultsList } from '@/components/lab-results-list'
+import { ImagingStudiesList } from '@/components/imaging-studies-list'
+import { ArrowLeft, AlertTriangle, Phone, CreditCard } from 'lucide-react'
 
 async function getPatient(id: string) {
   try {
@@ -17,6 +20,15 @@ async function getPatient(id: string) {
       include: {
         consultations: {
           orderBy: { startTime: 'desc' },
+        },
+        medications: {
+          orderBy: { startDate: 'desc' },
+        },
+        labResults: {
+          orderBy: { performedDate: 'desc' },
+        },
+        imagingStudies: {
+          orderBy: { performedDate: 'desc' },
         },
       },
     })
@@ -66,9 +78,15 @@ export default async function PatientDetailPage({
           <TabsTrigger value="consultations">
             Consultations ({patient.consultations?.length || 0})
           </TabsTrigger>
-          <TabsTrigger value="medications">Medications</TabsTrigger>
-          <TabsTrigger value="labs">Labs</TabsTrigger>
-          <TabsTrigger value="imaging">Imaging</TabsTrigger>
+          <TabsTrigger value="medications">
+            Medications ({patient.medications?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="labs">
+            Labs ({patient.labResults?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="imaging">
+            Imaging ({patient.imagingStudies?.length || 0})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary" className="space-y-4">
@@ -118,6 +136,78 @@ export default async function PatientDetailPage({
             </Card>
           </div>
 
+          {patient.allergies && patient.allergies.length > 0 && (
+            <Card className="border-destructive/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  Allergies
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {patient.allergies.map((allergy) => (
+                    <Badge key={allergy} variant="destructive">
+                      {allergy}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {patient.emergencyContact && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Emergency Contact
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">{patient.emergencyContact.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Relationship</p>
+                    <p className="font-medium">{patient.emergencyContact.relationship}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{patient.emergencyContact.phone}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {patient.insuranceInfo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Insurance Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Provider</p>
+                    <p className="font-medium">{patient.insuranceInfo.provider}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Policy Number</p>
+                    <p className="font-medium">{patient.insuranceInfo.policyNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Group Number</p>
+                    <p className="font-medium">{patient.insuranceInfo.groupNumber}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Labels & Conditions</CardTitle>
@@ -140,38 +230,57 @@ export default async function PatientDetailPage({
           {patient.vitals && (
             <Card>
               <CardHeader>
-                <CardTitle>Vitals</CardTitle>
+                <CardTitle>Recent Vitals</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                   {patient.vitals.bloodPressure && (
                     <div>
                       <p className="text-sm text-muted-foreground">Blood Pressure</p>
-                      <p className="font-medium">{patient.vitals.bloodPressure}</p>
+                      <p className="font-medium text-lg">{patient.vitals.bloodPressure}</p>
+                      <p className="text-xs text-muted-foreground">mmHg</p>
                     </div>
                   )}
                   {patient.vitals.heartRate && (
                     <div>
                       <p className="text-sm text-muted-foreground">Heart Rate</p>
-                      <p className="font-medium">{patient.vitals.heartRate} bpm</p>
+                      <p className="font-medium text-lg">{patient.vitals.heartRate}</p>
+                      <p className="text-xs text-muted-foreground">bpm</p>
                     </div>
                   )}
                   {patient.vitals.temperature && (
                     <div>
                       <p className="text-sm text-muted-foreground">Temperature</p>
-                      <p className="font-medium">{patient.vitals.temperature}°F</p>
+                      <p className="font-medium text-lg">{patient.vitals.temperature}</p>
+                      <p className="text-xs text-muted-foreground">°F</p>
                     </div>
                   )}
                   {patient.vitals.weight && (
                     <div>
                       <p className="text-sm text-muted-foreground">Weight</p>
-                      <p className="font-medium">{patient.vitals.weight} lbs</p>
+                      <p className="font-medium text-lg">{patient.vitals.weight}</p>
+                      <p className="text-xs text-muted-foreground">lbs</p>
                     </div>
                   )}
                   {patient.vitals.height && (
                     <div>
                       <p className="text-sm text-muted-foreground">Height</p>
-                      <p className="font-medium">{patient.vitals.height} cm</p>
+                      <p className="font-medium text-lg">{patient.vitals.height}</p>
+                      <p className="text-xs text-muted-foreground">cm</p>
+                    </div>
+                  )}
+                  {patient.vitals.bmi && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">BMI</p>
+                      <p className="font-medium text-lg">{patient.vitals.bmi}</p>
+                      <p className="text-xs text-muted-foreground">kg/m²</p>
+                    </div>
+                  )}
+                  {patient.vitals.oxygenSaturation && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">O₂ Saturation</p>
+                      <p className="font-medium text-lg">{patient.vitals.oxygenSaturation}</p>
+                      <p className="text-xs text-muted-foreground">%</p>
                     </div>
                   )}
                 </div>
@@ -197,42 +306,15 @@ export default async function PatientDetailPage({
         </TabsContent>
 
         <TabsContent value="medications">
-          <Card>
-            <CardHeader>
-              <CardTitle>Medications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Medications management coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
+          <MedicationsList medications={patient.medications || []} />
         </TabsContent>
 
         <TabsContent value="labs">
-          <Card>
-            <CardHeader>
-              <CardTitle>Laboratory Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Lab results coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
+          <LabResultsList labResults={patient.labResults || []} />
         </TabsContent>
 
         <TabsContent value="imaging">
-          <Card>
-            <CardHeader>
-              <CardTitle>Imaging Studies</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Imaging studies coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
+          <ImagingStudiesList imagingStudies={patient.imagingStudies || []} />
         </TabsContent>
       </Tabs>
     </div>

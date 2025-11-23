@@ -8,19 +8,25 @@ datasource db {
 }
 
 model Patient {
-  id            String         @id @default(cuid())
-  firstName     String
-  lastName      String
-  dob           DateTime
-  gender        String
-  phone         String?
-  email         String?
-  address       String?
-  labels        String[]
-  vitals        Json?
-  consultations Consultation[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String          @id @default(cuid())
+  firstName      String
+  lastName       String
+  dob            DateTime
+  gender         String
+  phone          String?
+  email          String?
+  address        String?
+  labels         String[]
+  vitals         Json?
+  allergies      String[]        @default([])
+  emergencyContact Json?
+  insuranceInfo  Json?
+  consultations  Consultation[]
+  medications    Medication[]
+  labResults     LabResult[]
+  imagingStudies ImagingStudy[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Consultation {
@@ -54,4 +60,54 @@ model Consultation {
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model Medication {
+  id            String   @id @default(cuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name          String
+  dosage        String
+  frequency     String
+  route         String?  // oral, IV, topical, etc.
+  prescribedBy  String?
+  startDate     DateTime
+  endDate       DateTime?
+  status        String   // Active, Discontinued, Completed
+  instructions  String?
+  refills       Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LabResult {
+  id            String   @id @default(cuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  testName      String
+  testType      String   // Blood, Urine, etc.
+  orderedBy     String?
+  performedDate DateTime
+  results       Json     // Array of {name, value, unit, referenceRange, status}
+  status        String   // Pending, Completed, Abnormal
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ImagingStudy {
+  id            String   @id @default(cuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  studyType     String   // X-Ray, CT, MRI, Ultrasound
+  bodyPart      String
+  orderedBy     String?
+  performedDate DateTime
+  findings      String?
+  impression    String?
+  status        String   // Scheduled, Completed, Reviewed
+  imageUrl      String?
+  radiologist   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
